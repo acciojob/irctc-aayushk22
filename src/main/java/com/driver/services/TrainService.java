@@ -21,19 +21,34 @@ public class TrainService {
     TrainRepository trainRepository;
 
     public Integer addTrain(AddTrainEntryDto trainEntryDto){
-
+        trainEntryDto.setDepartureTime(LocalTime.now());
         //Add the train to the trainRepository
+        Train train = new Train();
+        train.setNoOfSeats(trainEntryDto.getNoOfSeats());
+        train.setDepartureTime(trainEntryDto.getDepartureTime());
         //and route String logic to be taken from the Problem statement.
+        StringBuilder route = new StringBuilder();
+        List<Station> trainRoute = trainEntryDto.getStationRoute();
+
+        for (Station s: trainRoute) {
+            route.append(s);
+            route.append(",");
+        }
+        route.deleteCharAt(route.length()-1);
+
+        train.setRoute(route.toString());
+
         //Save the train and return the trainId that is generated from the database.
+        Train savedTrain = trainRepository.save(train);
         //Avoid using the lombok library
-        return null;
+        return savedTrain.getTrainId();
     }
 
     public Integer calculateAvailableSeats(SeatAvailabilityEntryDto seatAvailabilityEntryDto){
 
         //Calculate the total seats available
         //Suppose the route is A B C D
-        //And there are 2 seats avaialble in total in the train
+        //And there are 2 seats available in total in the train
         //and 2 tickets are booked from A to C and B to D.
         //The seat is available only between A to C and A to B. If a seat is empty between 2 station it will be counted to our final ans
         //even if that seat is booked post the destStation or before the boardingStation
