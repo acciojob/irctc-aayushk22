@@ -79,7 +79,7 @@ public class TrainService {
 
         for (Ticket ticket: ticketList) {
             if (ticket.getFromStation().equals(station)) {
-                countOfPassengersBoarding++;
+                countOfPassengersBoarding+= ticket.getPassengersList().size();
             }
         }
 
