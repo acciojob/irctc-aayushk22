@@ -23,11 +23,12 @@ public class Passenger {
 
     private int age;
 
-    //passengers and tickets are many to manny
+
 
     public Passenger() {
     }
 
+    //passengers and tickets are many to many and the ticket is the parent
     @ManyToMany
     @JoinColumn
     private List<Ticket> bookedTickets;
