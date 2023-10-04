@@ -2,6 +2,7 @@ package com.driver.services;
 
 
 import com.driver.EntryDto.BookTicketEntryDto;
+import com.driver.EntryDto.SeatAvailabilityEntryDto;
 import com.driver.model.Passenger;
 import com.driver.model.Ticket;
 import com.driver.model.Train;
@@ -27,6 +28,9 @@ public class TicketService {
 
     @Autowired
     PassengerRepository passengerRepository;
+
+    @Autowired
+    TrainService trainService;
 
 
     public Integer bookTicket(BookTicketEntryDto bookTicketEntryDto)throws Exception{
@@ -54,6 +58,12 @@ public class TicketService {
         }
         // Incase the there are insufficient tickets
         // throw new Exception("Less tickets are available");
+        SeatAvailabilityEntryDto seatAvailabilityEntryDto =
+                new SeatAvailabilityEntryDto(train.getTrainId(),bookTicketEntryDto.getFromStation(),
+                        bookTicketEntryDto.getToStation());
+        if (trainService.calculateAvailableSeats(seatAvailabilityEntryDto) < bookTicketEntryDto.getPassengerIds().size()) {
+            throw new Exception("Less tickets are available");
+        }
 
         //otherwise book the ticket, calculate the price and other details
         List<Integer> passengerIdList = bookTicketEntryDto.getPassengerIds();
