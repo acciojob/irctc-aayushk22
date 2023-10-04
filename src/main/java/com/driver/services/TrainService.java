@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 @Service
@@ -57,7 +55,41 @@ public class TrainService {
         //Inshort : a train has totalNo of seats and there are tickets from and to different locations
         //We need to find out the available seats between the given 2 stations.
 
-       return null;
+        Train train = trainRepository.findById(seatAvailabilityEntryDto.getTrainId()).get();
+        String [] stations = train.getRoute().split(",");
+        ArrayList<String> stationsList  = new ArrayList<>(Arrays.asList(stations));
+
+        int totalSeatsInTrain = train.getNoOfSeats();
+        int availableSeats = 0;
+        Station fromStation = seatAvailabilityEntryDto.getFromStation();
+        Station toStation = seatAvailabilityEntryDto.getToStation();
+        String destinationStation = stationsList.get(stationsList.size()-1);
+
+        HashMap<String,Integer> freqOfPassengersAtStation = new HashMap<>();
+        for (String station: stationsList) {
+            if (stationsList.indexOf(station) >= stationsList.indexOf(fromStation.toString())
+                    && stationsList.indexOf(station) <= stationsList.indexOf(toStation.toString()))
+                        freqOfPassengersAtStation.put(station,0);
+        }
+
+        List<Ticket> bookedTickets = train.getBookedTickets();
+        for (Ticket t: bookedTickets) {
+            ArrayList<String> inclStations = new ArrayList<>(stationsList.subList(stationsList.indexOf(t.getFromStation().toString()),
+                    stationsList.indexOf(t.getToStation().toString())));
+            for (String incStation: inclStations) {
+                if (freqOfPassengersAtStation.containsKey(incStation)) {
+                    freqOfPassengersAtStation.put(incStation,freqOfPassengersAtStation.get(incStation)+t.getPassengersList().size());
+                }
+            }
+        }
+
+        for (String s: freqOfPassengersAtStation.keySet()) {
+            if (!Objects.equals(s, destinationStation)) {
+                availableSeats += totalSeatsInTrain - freqOfPassengersAtStation.get(s);
+            }
+        }
+
+        return availableSeats;
     }
 
     public Integer calculatePeopleBoardingAtAStation(Integer trainId,Station station) throws Exception{
